@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from BasicChecker import Basic
-from ModulesChecker import Modules
+from .BasicChecker import Basic
+from .ModulesChecker import Modules
 
 
 class Orig(BaseModel):

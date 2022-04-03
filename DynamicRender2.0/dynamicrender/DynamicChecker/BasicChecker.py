@@ -15,4 +15,4 @@ class LikeIcon(BaseModel):
 class Basic(BaseModel):
     comment_id_str: Optional[str]
     comment_type: Optional[int]
-    like_icon: Optional[LikeIcon]
+    like_icon: Optional[LikeIcon] = None

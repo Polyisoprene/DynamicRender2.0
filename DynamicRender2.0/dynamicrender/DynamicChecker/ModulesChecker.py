@@ -41,7 +41,7 @@ class Badge(BaseModel):
     text: Optional[str]
 
 
-class Stat(Badge):
+class Stat(BaseModel):
     danmaku: Optional[str]
     play: Optional[str]
 
@@ -72,18 +72,20 @@ class Fan(BaseModel):
 
 
 class RichTextDetail(BaseModel):
-    emoji: Optional[Emoji]
-    jump_url: Optional[AnyUrl]
+    emoji: Optional[Emoji] = None
+    jump_url: Union[AnyUrl, str, None] = None
     orig_text: Optional[str] = None
     text: Optional[str] = None
     # RICH_TEXT_NODE_TYPE_TEXT 文本
+    # RICH_TEXT_NODE_TYPE_AT At
+    # RICH_TEXT_NODE_TYPE_VOTE 投票
     # RICH_TEXT_NODE_TYPE_TOPIC 话题
     # RICH_TEXT_NODE_TYPE_BV Bv转视频
-    # RICH_TEXT_NODE_TYPE_AT At
     # RICH_TEXT_NODE_TYPE_WEB 网页链接
-    # RICH_TEXT_NODE_TYPE_EMOJI bili_emoji
     # RICH_TEXT_NODE_TYPE_LOTTERY 抽奖
     # RICH_TEXT_NODE_TYPE_GOODS 恰饭 640021213187407875
+    # RICH_TEXT_NODE_TYPE_EMOJI bili_emoji
+
     type: Optional[str] = None
 
 
@@ -103,7 +105,7 @@ class Archive(BaseModel):
     type: Optional[int]
 
 
-class Article:
+class Article(BaseModel):
     covers: Optional[List[AnyUrl]]
     desc: Optional[str]
     id: Optional[int]
@@ -111,7 +113,7 @@ class Article:
     title: Optional[str]
 
 
-class Common:
+class Common(BaseModel):
     badge: Optional[Badge]
     # |_biz_type
     #   |_0     活动       641222605723926534
@@ -190,7 +192,7 @@ class Pgc(BaseModel):
 
 # 二级
 class Decorate(BaseModel):
-    card_url: Optional[AnyUrl]
+    card_url: Union[AnyUrl, str, None]
     fan: Optional[Fan]
     name: Optional[str]
     type: Optional[int]
@@ -203,13 +205,14 @@ class OfficialVerify(BaseModel):
 
 class Pendant(BaseModel):
     expire: Optional[int]
-    image: Optional[AnyUrl]
-    image_enhance: Optional[AnyUrl]
+    image: Union[AnyUrl, str, None]
+    image_enhance: Union[AnyUrl, str, None]
     name: str
 
 
 class Vip(BaseModel):
-    avatar_subscript_url: Union[AnyUrl, str, None] = None
+    avatar_subscript: Optional[int]
+    avatar_subscript_url: Union[AnyUrl, str, None]
     due_date: Optional[int]
     nickname_color: Optional[str]
     status: Optional[int]
@@ -278,20 +281,20 @@ class Major(BaseModel):
 class Topic(BaseModel):
     id: Optional[int] = None
     name: Optional[str] = None
-    jump_url: Optional[AnyUrl] = None
+    jump_url: Union[AnyUrl, str, None] = None
 
 
 # 一级
 class ModuleAuthor(BaseModel):
     decorate: Optional[Decorate] = None
-    face: Optional[AnyUrl]
-    face_nft: Optional[bool]
+    face: Optional[AnyUrl] = None
+    face_nft: Optional[bool] = None
     following: Optional[int] = None
-    jump_url: Optional[AnyUrl]
+    jump_url: Union[AnyUrl, str, None] = None
     label: Optional[str] = None
-    mid: Optional[int]
-    name: Optional[str]
-    official_verify: Optional[OfficialVerify]
+    mid: Optional[int] = None
+    name: Optional[str] = None
+    official_verify: Optional[OfficialVerify] = None
     pendant: Optional[Pendant] = None
     pub_time: str
     pub_ts: int
@@ -316,7 +319,7 @@ class ModuleDynamic(BaseModel):
 
 # 入口
 class Modules(BaseModel):
-    module_author: Optional[ModuleAuthor]
-    module_dynamic: Optional[ModuleDynamic]
+    module_author: Optional[ModuleAuthor] = None
+    module_dynamic: Optional[ModuleDynamic] = None
     # module_more: Optional[ModuleMore]
     # module_stat: Optional[ModuleStat]
