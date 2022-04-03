@@ -172,7 +172,7 @@ class TextRender:
                     emoji_info.append({"name": rich_text.emoji.text, "url": str(rich_text.emoji.icon_url)})
                     continue
         if self.dynamic.topic:
-            new_text = self.rich_text_Instead[4] + self.dynamic.topic.name
+            new_text = self.rich_text_Instead[4] + self.dynamic.topic.name + "\n"
             text = new_text + text
             info_list.append(new_text)
         # 如果有bili_emoji,对其去重并下载
