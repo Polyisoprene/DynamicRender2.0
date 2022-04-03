@@ -13,7 +13,8 @@ from dynamicrender.DynamicChecker.ModulesChecker import ModuleDynamic
 
 
 class TextRender:
-    def __init__(self, dynamic: ModuleDynamic):
+    def __init__(self, dynamic: ModuleDynamic, forward=False):
+        self.forward = forward
         self.container = None
         self.draw = None
         self.client = None
@@ -46,7 +47,10 @@ class TextRender:
         # 读取字体名
         font_name = config.get("Font", "main_font")
         # 读取背景色
-        text_container_color = config.get("Color", "main_color")
+        if not self.forward:
+            text_container_color = config.get("Color", "main_color")
+        else:
+            text_container_color = config.get("Color", "repost_color")
         # 读取emoji字体大小
         emoji_font_size = config.getint("Size", "emoji_font_size")
         # 读取emoji字体名
@@ -78,62 +82,100 @@ class TextRender:
             rich_text_content = result["rich_text_content"]
             emoji_pics = result["emoji_pics"]
             rich_text_index = await self.calculate_rich_index(description, rich_text_content)
-            word_position_list = await self.calculate_text_position(start_x=20, start_y=10, x_constraint=1070,
+            word_position_list = await self.calculate_text_position(start_x=20, start_y=10, x_constraint=1068,
                                                                     text=description, text_color=font_color,
                                                                     text_size=font_size, img_list=emoji_pics,
                                                                     rich_index=rich_text_index)
 
             content_y = word_position_list[-1]["position"][1] + 50
             # 创建承载文本主体的图片
-            self.container = Image.new("RGBA", (1108, content_y), color=text_container_color)
+            if not self.forward:
+                self.container = Image.new("RGBA", (1108, content_y), color=text_container_color)
+            else:
+                self.container = Image.new("RGBA", (1068, content_y), color=text_container_color)
             self.draw = ImageDraw.Draw(self.container)
             with ThreadPoolExecutor(5) as pool:
                 pool.map(self.draw_pic, word_position_list)
             return self.container
+        else:
+            if self.dynamic.topic:
+                result = await self.get_all_rich_text(text="", rich_text_nodes=[])
+                description = result["content"]
+                rich_text_content = result["rich_text_content"]
+                emoji_pics = result["emoji_pics"]
+                rich_text_index = await self.calculate_rich_index(description, rich_text_content)
+                if not self.forward:
+                    word_position_list = await self.calculate_text_position(start_x=20, start_y=10, x_constraint=1068,
+                                                                            text=description, text_color=font_color,
+                                                                            text_size=font_size, img_list=emoji_pics,
+                                                                            rich_index=rich_text_index)
+                else:
+                    word_position_list = await self.calculate_text_position(start_x=10, start_y=10, x_constraint=1044,
+                                                                            text=description, text_color=font_color,
+                                                                            text_size=font_size, img_list=emoji_pics,
+                                                                            rich_index=rich_text_index)
+
+                content_y = word_position_list[-1]["position"][1] + 50
+                # 创建承载文本主体的图片
+                if not self.forward:
+                    self.container = Image.new("RGBA", (1108, content_y), color=text_container_color)
+                else:
+                    self.container = Image.new("RGBA", (1068, content_y), color=text_container_color)
+                self.draw = ImageDraw.Draw(self.container)
+                with ThreadPoolExecutor(5) as pool:
+                    pool.map(self.draw_pic, word_position_list)
+                return self.container
 
     async def get_all_rich_text(self, text, rich_text_nodes) -> dict:
+        """
+        获取所有富文本
+        :param text:
+        :param rich_text_nodes:
+        :return:
+        """
         info_list = []
         emoji_list = []
         emoji_info_list = []
         emoji_info = []
-        for rich_text in rich_text_nodes:
-            if rich_text.type in ["RICH_TEXT_NODE_TYPE_TOPIC", "RICH_TEXT_NODE_TYPE_AT"]:
-                info_list.append(rich_text.text)
-                continue
-            if rich_text.type == "RICH_TEXT_NODE_TYPE_BV":
-                new_text = self.rich_text_Instead[0] + rich_text.text
-                text = text.replace("https://b23.tv/" + rich_text.orig_text, new_text)
-                text = text.replace(rich_text.orig_text, new_text)
-                info_list.append(new_text)
-                continue
-            if rich_text.type == "RICH_TEXT_NODE_TYPE_WEB":
-                new_text = self.rich_text_Instead[1] + rich_text.text
-                text = text.replace(rich_text.orig_text, new_text)
-                info_list.append(new_text)
-                continue
-            if rich_text.type == "RICH_TEXT_NODE_TYPE_LOTTERY":
-                new_text = self.rich_text_Instead[2] + rich_text.text
-                text = text.replace(rich_text.orig_text, new_text)
-                info_list.append(new_text)
-                continue
-            if rich_text.type == "RICH_TEXT_NODE_TYPE_GOODS":
-                new_text = self.rich_text_Instead[3] + rich_text.text
-                text = text.replace(rich_text.orig_text, new_text)
-                info_list.append(new_text)
-                continue
-            if rich_text.type == "RICH_TEXT_NODE_TYPE_VOTE":
-                new_text = self.rich_text_Instead[5] + rich_text.text
-                text = text.replace(rich_text.orig_text, new_text)
-                info_list.append(new_text)
-                continue
-            if rich_text.type == "RICH_TEXT_NODE_TYPE_EMOJI":
-                emoji_info.append({"name": rich_text.emoji.text, "url": str(rich_text.emoji.icon_url)})
-                continue
+        if rich_text_nodes:
+            for rich_text in rich_text_nodes:
+                if rich_text.type in ["RICH_TEXT_NODE_TYPE_TOPIC", "RICH_TEXT_NODE_TYPE_AT"]:
+                    info_list.append(rich_text.text)
+                    continue
+                if rich_text.type == "RICH_TEXT_NODE_TYPE_BV":
+                    new_text = self.rich_text_Instead[0] + rich_text.text
+                    text = text.replace("https://b23.tv/" + rich_text.orig_text, new_text)
+                    text = text.replace(rich_text.orig_text, new_text)
+                    info_list.append(new_text)
+                    continue
+                if rich_text.type == "RICH_TEXT_NODE_TYPE_WEB":
+                    new_text = self.rich_text_Instead[1] + rich_text.text
+                    text = text.replace(rich_text.orig_text, new_text)
+                    info_list.append(new_text)
+                    continue
+                if rich_text.type == "RICH_TEXT_NODE_TYPE_LOTTERY":
+                    new_text = self.rich_text_Instead[2] + rich_text.text
+                    text = text.replace(rich_text.orig_text, new_text)
+                    info_list.append(new_text)
+                    continue
+                if rich_text.type == "RICH_TEXT_NODE_TYPE_GOODS":
+                    new_text = self.rich_text_Instead[3] + rich_text.text
+                    text = text.replace(rich_text.orig_text, new_text)
+                    info_list.append(new_text)
+                    continue
+                if rich_text.type == "RICH_TEXT_NODE_TYPE_VOTE":
+                    new_text = self.rich_text_Instead[5] + rich_text.text
+                    text = text.replace(rich_text.orig_text, new_text)
+                    info_list.append(new_text)
+                    continue
+                if rich_text.type == "RICH_TEXT_NODE_TYPE_EMOJI":
+                    emoji_info.append({"name": rich_text.emoji.text, "url": str(rich_text.emoji.icon_url)})
+                    continue
         if self.dynamic.topic:
             new_text = self.rich_text_Instead[4] + self.dynamic.topic.name
             text = new_text + text
             info_list.append(new_text)
-
+        # 如果有bili_emoji,对其去重并下载
         if emoji_info:
             for i in emoji_info:
                 if i not in emoji_info_list:
@@ -145,7 +187,6 @@ class TextRender:
                 emoji_result = pool.map(self.get_emoji, emoji_info_list)
             for i in emoji_result:
                 emoji_list.append(i)
-
         # 去除特殊符号
         text = text.replace("\r", "")
         # 将组合emoji替换成emoji的第一个
@@ -162,8 +203,15 @@ class TextRender:
         return {"content": text, "rich_text_content": info_list, "emoji_pics": emoji_list}
 
     async def calculate_rich_index(self, text, rich_text_info):
+        """
+        获取副文本所有文字的索引
+        :param text: 源文本
+        :param rich_text_info: 副文本列表
+        :return:
+        """
         particular_text_index_set = ()
         for rich_text_detail in rich_text_info:
+            # 加号和括号会影响正则，所以转义掉
             rich_text_detail = rich_text_detail.replace("+", "\+").replace("(", "\(")
             for t in re.finditer(rich_text_detail, text):
                 particular_text_index_set = particular_text_index_set + tuple(x for x in range(t.start(), t.end()))
