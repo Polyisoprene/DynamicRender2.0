@@ -271,11 +271,11 @@ class Major(BaseModel):
     # 专栏专有
     article: Optional[Article]
     # MAJOR_TYPE_COMMON 专有
-    common: Optional[Common] = None
+    common: Optional[Common]
     # 直播动态专有
     live_rcmd: Optional[LiveRcmd]
     # MAJOR_TYPE_PGC 专有
-    pgc: Optional[Pgc] = None
+    pgc: Optional[Pgc]
 
 
 class Topic(BaseModel):
