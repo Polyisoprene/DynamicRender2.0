@@ -63,6 +63,12 @@ class GoodsItem(BaseModel):
     cover: Optional[AnyUrl]
     name: Optional[str]
     price: Optional[str]
+    jump_desc: Optional[str]
+
+
+class RichGoods(BaseModel):
+    type: int
+    jump_url: str
 
 
 # 三级
@@ -72,19 +78,20 @@ class Fan(BaseModel):
 
 
 class RichTextDetail(BaseModel):
-    emoji: Optional[Emoji] = None
+    goods: Optional[RichGoods]
+    emoji: Optional[Emoji]
     jump_url: Union[AnyUrl, str, None] = None
     orig_text: Optional[str] = None
     text: Optional[str] = None
-    # RICH_TEXT_NODE_TYPE_TEXT 文本
-    # RICH_TEXT_NODE_TYPE_AT At
-    # RICH_TEXT_NODE_TYPE_VOTE 投票
-    # RICH_TEXT_NODE_TYPE_TOPIC 话题
-    # RICH_TEXT_NODE_TYPE_BV Bv转视频
-    # RICH_TEXT_NODE_TYPE_WEB 网页链接
-    # RICH_TEXT_NODE_TYPE_LOTTERY 抽奖
-    # RICH_TEXT_NODE_TYPE_GOODS 恰饭 640021213187407875
-    # RICH_TEXT_NODE_TYPE_EMOJI bili_emoji
+    # RICH_TEXT_NODE_TYPE_TEXT      文本
+    # RICH_TEXT_NODE_TYPE_AT        At
+    # RICH_TEXT_NODE_TYPE_VOTE      投票
+    # RICH_TEXT_NODE_TYPE_TOPIC     话题
+    # RICH_TEXT_NODE_TYPE_BV        Bv转视频
+    # RICH_TEXT_NODE_TYPE_WEB       网页链接
+    # RICH_TEXT_NODE_TYPE_LOTTERY   抽奖
+    # RICH_TEXT_NODE_TYPE_GOODS     恰饭 640021213187407875
+    # RICH_TEXT_NODE_TYPE_EMOJI     bili_emoji
 
     type: Optional[str] = None
 
@@ -115,6 +122,7 @@ class Article(BaseModel):
 
 class Common(BaseModel):
     badge: Optional[Badge]
+    biz_type: Optional[int] = None
     # |_biz_type
     #   |_0     活动       641222605723926534
     #   |_3     装扮       551309621391003098
@@ -123,7 +131,6 @@ class Common(BaseModel):
     #   |_201   漫画       639302493349609508
     #   |_231   挂件       639301892067819543
     #   |_212   话题分享    644198519846993953
-    biz_type: Optional[int] = None
     cover: Optional[AnyUrl] = None
     desc: Optional[str] = None
     style: Optional[int] = None
@@ -188,6 +195,28 @@ class Pgc(BaseModel):
     # |_ 5:电视剧 454130952617983540
     sub_type: Optional[int]
     title: Optional[str]
+
+
+class MajorNone(BaseModel):
+    tips: str
+
+
+class MediaList(BaseModel):
+    badge: Badge
+    cover: str
+    cover_type: int
+    sub_title: str
+    title: str
+
+
+class Live(BaseModel):
+    badge: Badge
+    cover: Optional[str]
+    desc_first: str
+    desc_second: str
+    title: str
+    live_state: int
+    reserve_type: int
 
 
 # 二级
@@ -256,13 +285,16 @@ class Desc(BaseModel):
 
 class Major(BaseModel):
     # 纯文本类型无major
-    # MAJOR_TYPE_ARCHIVE 视频 203507842683697712
-    # MAJOR_TYPE_LIVE_RCMD 直播
-    # MAJOR_TYPE_DRAW 图片 643771535681650743
-    # MAJOR_TYPE_ARTICLE 专栏 643999976413724675
-    # MAJOR_TYPE_MUSIC 音乐类型 611350614197990095
-    # MAJOR_TYPE_COMMON 装扮等 551309621391003098
-    # MAJOR_TYPE_PGC 番剧、电影、纪录片 633983562923638785
+    # MAJOR_TYPE_ARCHIVE    视频              203507842683697712
+    # MAJOR_TYPE_LIVE_RCMD  直播
+    # MAJOR_TYPE_DRAW       图片              643771535681650743
+    # MAJOR_TYPE_ARTICLE    专栏              643999976413724675
+    # MAJOR_TYPE_MUSIC      音乐类型           611350614197990095
+    # MAJOR_TYPE_COMMON     装扮等             551309621391003098
+    # MAJOR_TYPE_PGC        番剧、电影、纪录片   633983562923638785
+    # MAJOR_TYPE_NONE       直播结束            641187318269476881
+    # MAJOR_TYPE_MEDIALIST  收藏夹             645144864367837192
+    # MAJOR_TYPE_LIVE       分享直播
     type: Optional[str]
     # 图片类型动态专有
     draw: Optional[Draw]
@@ -276,6 +308,12 @@ class Major(BaseModel):
     live_rcmd: Optional[LiveRcmd]
     # MAJOR_TYPE_PGC 专有
     pgc: Optional[Pgc]
+    # none
+    none: Optional[MajorNone]
+    # 收藏夹
+    medialist: Optional[MediaList]
+    # 分享直播
+    live: Optional[Live]
 
 
 class Topic(BaseModel):

@@ -155,7 +155,7 @@ class HeaderRender:
         # 头像尺寸
         avatar_size = avatar.size
         avatar_draw = ImageDraw.Draw(avatar)
-        avatar_draw.ellipse(((0, 0), (240, 240)), fill=None, outline="#99a2aa", width=5)
+        avatar_draw.ellipse(((0, 0), (240, 240)), fill=None, outline=(251, 114, 153), width=5)
         # 头像路径
         # 新建一个蒙板图
         mask = Image.new('RGBA', avatar_size, color=(0, 0, 0, 0))

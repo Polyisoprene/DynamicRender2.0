@@ -2,9 +2,10 @@ import configparser
 import os
 import traceback
 
-from dynamicrender.Logger import logger
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
+
+from ..Logger import logger
 
 
 class FooterRender:
@@ -31,7 +32,7 @@ class FooterRender:
             # 贴上看板娘
             container.paste(girl, (825, -5), girl)
             # 贴上二维码
-            container.paste(qr_code, (900, 155), qr_code)
+            container.paste(qr_code, (905, 160), qr_code)
             # 贴上bili图标
             container.paste(bili_pic, (50, 100), bili_pic)
             # 写入提示扫码语句
@@ -43,10 +44,11 @@ class FooterRender:
         except:
             logger.error("\n" + traceback.format_exc())
 
-
     async def __make_qrcode(self):
         qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=3, border=1)
         qr.add_data("https://t.bilibili.com/" + str(self.__dynamic_id))
         qr.make(fit=True)
-        img = qr.make_image(fill_color="white", back_color=(34, 34, 34, 255)).convert("RGBA").rotate(-8, expand=True)
+        img = qr.make_image(fill_color="black", back_color="#ebceaf").convert("RGBA").rotate(-8, expand=True,
+                                                                                             resample=Image.BICUBIC)
+        img = img.resize((103, 103))
         return img

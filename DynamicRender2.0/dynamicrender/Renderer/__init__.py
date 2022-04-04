@@ -7,9 +7,10 @@ from PIL import Image
 
 from dynamicrender.DynamicChecker import Item
 from dynamicrender.Logger import logger
-from .FooterRenderer import FooterRender
-from .HeaderRenderer import HeaderRender
-from .TextRenderer import TextRender
+from dynamicrender.Renderer.FooterRenderer import FooterRender
+from dynamicrender.Renderer.HeaderRenderer import HeaderRender
+from dynamicrender.Renderer.TextRenderer import TextRender
+
 
 class BiliRender:
     def __init__(self, dynamic: Item):
@@ -47,12 +48,15 @@ class BiliRender:
         emoji_cache_path = os.path.join(current_path, "Cache", "Emoji")
         # 配置文件路径
         config_path = os.path.join(current_path, "config.ini")
+        # 当前文件绝对路径
+        curren_abs_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         if not os.path.exists(static_path):
             try:
+
                 logger.info("创建静态文件目录")
-                os.makedirs(os.path.join(static_path, "Picture"))
-                os.makedirs(os.path.join(static_path, "Font"))
-                logger.warning("请于https://gitee.com/DMC_der/DynamicRender2.0/tree/feature/下载对应静态文件并放于static目录内")
+                os.makedirs(static_path)
+                self.copy_dir(os.path.join(curren_abs_path, "Static"), static_path)
+                logger.info("静态文件创建完毕")
             except:
                 logger.error("\n" + traceback.format_exc())
         else:
@@ -101,6 +105,10 @@ class BiliRender:
             config.read(config_path)
             self.__main_color = config.get("Color", "main_color")
 
+    async def render(self):
+        img = await self.function_dic[self.__dynamic.type]()
+        return img
+
     async def word_dynamic(self):
         """
         文本型动态处理函数
@@ -110,7 +118,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -130,7 +138,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -150,7 +158,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -169,7 +177,7 @@ class BiliRender:
         try:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -188,7 +196,7 @@ class BiliRender:
         try:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -208,7 +216,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -228,7 +236,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -248,7 +256,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -268,7 +276,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -288,7 +296,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -308,7 +316,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
-            tasks.append(FooterRender(self.__dynamic.modules.module_author.mid).foot_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -322,11 +330,39 @@ class BiliRender:
     async def assemble_card(self, result):
         y = 0
         for i in result:
-            y += i.size[1]
+            if i:
+                y += i.size[1]
         container = Image.new("RGBA", (1108, y), self.__main_color)
         position_y = 0
         for z in range(len(result)):
             if z != 0:
-                position_y += result[z - 1].size[1]
-            container.paste(result[z], (int((container.size[0] - result[z].size[0]) / 2), position_y))
+                if result[z - 1]:
+                    position_y += result[z - 1].size[1]
+            if result[z]:
+                container.paste(result[z], (int((container.size[0] - result[z].size[0]) / 2), position_y))
         return container
+
+    def copy_dir(self, src_path, target_path):
+        if os.path.isdir(src_path) and os.path.isdir(target_path):
+            filelist_src = os.listdir(src_path)
+            for file in filelist_src:
+                path = os.path.join(os.path.abspath(src_path), file)
+                if os.path.isdir(path):
+                    path1 = os.path.join(os.path.abspath(target_path), file)
+                    if not os.path.exists(path1):
+                        os.mkdir(path1)
+                    self.copy_dir(path, path1)
+                else:
+                    with open(path, 'rb') as read_stream:
+                        contents = read_stream.read()
+                        path1 = os.path.join(target_path, file)
+                        with open(path1, 'wb') as write_stream:
+                            write_stream.write(contents)
+            return True
+
+        else:
+            return False
+
+
+if __name__ == '__main__':
+    print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

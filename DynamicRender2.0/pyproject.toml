@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "DynamicRender2.0"
+name = "DynamicRender"
 version = "0.1.0"
 description = ""
-authors = ["dunkirk-4 <lzxder@outlook.com>"]
+authors = ["DMC <lzxder@outlook.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"

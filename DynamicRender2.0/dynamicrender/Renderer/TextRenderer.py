@@ -9,7 +9,7 @@ import httpx
 from PIL import ImageFont, Image, ImageDraw
 from fontTools.ttLib.ttFont import TTFont
 
-from dynamicrender.DynamicChecker.ModulesChecker import ModuleDynamic
+from ..DynamicChecker.ModulesChecker import ModuleDynamic
 
 
 class TextRender:
@@ -26,7 +26,7 @@ class TextRender:
         self.text_font = None
         self.__base_path = os.getcwd()
 
-        # 0 Bv转视频 1 网页链接 2 抽奖 3 恰饭 4 new_topic 5 投票
+        # 0 Bv转视频 1 网页链接 2 抽奖 3 恰饭 4 new_topic 5 投票 6 恰饭2.0
         self.rich_text_Instead = ["㉠", "㉡", "㉣", "㉢", "㉤", "㉥", "㉦"]
         self.emoji_pic_tag_instead = ["㉧", "㉨", "㉩", "㉪", "㉫", "㉬", "㉭", "㉮", "㉯", '㉰', "㉱", "㉲", "㉳", "㉴", "㉵", "㉶",
                                       "㉷", "㉸", "㉹", "㉺", "㉻", "㉿", "㋐", "㋑", "㋒", "㋓", "㋔", "㋕", "㋖", "㋗", "㋘", "㋙",
@@ -82,10 +82,16 @@ class TextRender:
             rich_text_content = result["rich_text_content"]
             emoji_pics = result["emoji_pics"]
             rich_text_index = await self.calculate_rich_index(description, rich_text_content)
-            word_position_list = await self.calculate_text_position(start_x=20, start_y=10, x_constraint=1068,
-                                                                    text=description, text_color=font_color,
-                                                                    text_size=font_size, img_list=emoji_pics,
-                                                                    rich_index=rich_text_index)
+            if not self.forward:
+                word_position_list = await self.calculate_text_position(start_x=20, start_y=10, x_constraint=1068,
+                                                                        text=description, text_color=font_color,
+                                                                        text_size=font_size, img_list=emoji_pics,
+                                                                        rich_index=rich_text_index)
+            else:
+                word_position_list = await self.calculate_text_position(start_x=10, start_y=10, x_constraint=1044,
+                                                                        text=description, text_color=font_color,
+                                                                        text_size=font_size, img_list=emoji_pics,
+                                                                        rich_index=rich_text_index)
 
             content_y = word_position_list[-1]["position"][1] + 50
             # 创建承载文本主体的图片
@@ -159,7 +165,10 @@ class TextRender:
                     info_list.append(new_text)
                     continue
                 if rich_text.type == "RICH_TEXT_NODE_TYPE_GOODS":
-                    new_text = self.rich_text_Instead[3] + rich_text.text
+                    if rich_text.goods.type == 1:
+                        new_text = self.rich_text_Instead[3] + rich_text.text
+                    else:
+                        new_text = self.rich_text_Instead[1] + rich_text.text
                     text = text.replace(rich_text.orig_text, new_text)
                     info_list.append(new_text)
                     continue

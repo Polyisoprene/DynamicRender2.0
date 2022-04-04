@@ -21,6 +21,7 @@ class Item(BaseModel):
     # DYNAMIC_TYPE_PGC              番剧、电影、纪录片等 633983562923638785
     # DYNAMIC_TYPE_MUSIC            音乐      611350614197990095
     # DYNAMIC_TYPE_COMMON_SQUARE    装扮      551309621391003098
+    # DYNAMIC_TYPE_MEDIALIST        收藏      645144864359448578
 
     type: str
     orig: Optional[Orig] = None
