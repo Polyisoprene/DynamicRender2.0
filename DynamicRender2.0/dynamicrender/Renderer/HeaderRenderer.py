@@ -170,7 +170,7 @@ class HeaderRender:
         #   mask 为蒙板，原理同 ps， 只显示 mask 中 Alpha 通道值大于等于1的部分
         bg.paste(avatar, box, mask)
         bg = bg.resize((96, 96), Image.ANTIALIAS)
-        bg_draw = ImageDraw.Draw(bg)
+        # bg_draw = ImageDraw.Draw(bg)
         return bg
 
     async def __assembly_header(self, document_info: dict) -> None:

@@ -1,0 +1,30 @@
+[2022-04-06  13:59:09] HeaderRenderer.py ->main_header_render [ERROR] : 
+Traceback (most recent call last):
+  File "/home/lzx/文档/pyfile/DynamicRender2.0/dynamicrender/Renderer/HeaderRenderer.py", line 69, in main_header_render
+    bili_pic = Image.open(os.path.join(self.__current_path, "Static", "Picture", "bilibili.png")).convert(
+  File "/home/lzx/.envs/dy/lib/python3.9/site-packages/PIL/Image.py", line 2953, in open
+    fp = builtins.open(filename, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: '/home/lzx/文档/pyfile/DynamicRender2.0/Static/Picture/bilibili.png'
+
+[2022-04-06  13:59:09] FooterRenderer.py ->foot_render [ERROR] : 
+Traceback (most recent call last):
+  File "/home/lzx/文档/pyfile/DynamicRender2.0/dynamicrender/Renderer/FooterRenderer.py", line 28, in foot_render
+    girl = Image.open(os.path.join(self.__base_path, "Static", "Picture", "yyj.png")).convert("RGBA").resize(
+  File "/home/lzx/.envs/dy/lib/python3.9/site-packages/PIL/Image.py", line 2953, in open
+    fp = builtins.open(filename, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: '/home/lzx/文档/pyfile/DynamicRender2.0/Static/Picture/yyj.png'
+
+[2022-04-06  13:59:09] __init__.py ->draw_dynamic [ERROR] : 
+Traceback (most recent call last):
+  File "/home/lzx/文档/pyfile/DynamicRender2.0/dynamicrender/Renderer/__init__.py", line 143, in draw_dynamic
+    result = await asyncio.gather(*tasks)
+  File "/home/lzx/文档/pyfile/DynamicRender2.0/dynamicrender/Renderer/TextRenderer.py", line 60, in main_text_render
+    self.text_font = ImageFont.truetype(os.path.join(self.__base_path, "Static", "Font", font_name), font_size)
+  File "/home/lzx/.envs/dy/lib/python3.9/site-packages/PIL/ImageFont.py", line 844, in truetype
+    return freetype(font)
+  File "/home/lzx/.envs/dy/lib/python3.9/site-packages/PIL/ImageFont.py", line 841, in freetype
+    return FreeTypeFont(font, size, index, encoding, layout_engine)
+  File "/home/lzx/.envs/dy/lib/python3.9/site-packages/PIL/ImageFont.py", line 193, in __init__
+    self.font = core.getfont(
+OSError: cannot open resource
+

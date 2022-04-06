@@ -20,6 +20,14 @@ class LiveRecordInfo(BaseModel):
     pass
 
 
+class JumpStyle(BaseModel):
+    text: str
+
+
+class AddOnCommonCheck(BaseModel):
+    text: str
+
+
 # 四级
 class Emoji(BaseModel):
     icon_url: Optional[AnyUrl]
@@ -69,6 +77,13 @@ class GoodsItem(BaseModel):
 class RichGoods(BaseModel):
     type: int
     jump_url: str
+
+
+class AddOnButton(BaseModel):
+    type: int
+    jump_url: Optional[str]
+    jump_style: Optional[JumpStyle]
+    check: Optional[AddOnCommonCheck]
 
 
 # 三级
@@ -126,6 +141,7 @@ class Common(BaseModel):
     # |_biz_type
     #   |_0     活动       641222605723926534
     #   |_3     装扮       551309621391003098
+    #   |_111   分享的游戏  645309310073569287
     #   |_131   歌单       639296660796604438
     #   |_141   频道       631743110398869511
     #   |_201   漫画       639302493349609508
@@ -148,6 +164,7 @@ class Reserve(BaseModel):
     desc2: Optional[AddOnDesc] = None
     desc3: Optional[AddOnDesc] = None
     reserve_total: Optional[int]
+    # button: Optional[Button]
 
 
 class Goods(BaseModel):
@@ -156,6 +173,7 @@ class Goods(BaseModel):
 
 
 class AddOnCommon(BaseModel):
+    button: Optional[AddOnButton]
     cover: Optional[AnyUrl]
     head_text: Optional[str]
     desc1: Optional[str] = None

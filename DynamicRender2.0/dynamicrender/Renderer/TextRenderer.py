@@ -197,7 +197,7 @@ class TextRender:
             for i in emoji_result:
                 emoji_list.append(i)
         # 去除特殊符号
-        text = text.replace("\r", "")
+        text = text.replace("\r", "").replace(chr(65039), "")
         # 将组合emoji替换成emoji的第一个
         if self.emoji_list:
             temp = []
@@ -207,7 +207,9 @@ class TextRender:
                     text = text.replace(i, emoji_first)
                     temp.append(emoji_first)
                     continue
-                temp.append(i)
+                else:
+                    temp.append(i)
+                    continue
             self.emoji_list = temp
         return {"content": text, "rich_text_content": info_list, "emoji_pics": emoji_list}
 
@@ -265,10 +267,10 @@ class TextRender:
                 # 如果按照索引取不到图片就把content[i]当作字符
                 try:
                     t_content = img_list[self.emoji_pic_tag_instead.index(text[i])].resize(
-                        (text_size, text_size),
+                        (int(text_size*1.5), int(text_size*1.5)),
                         Image.ANTIALIAS)
-                    position_list.append({"info_type": "img", "content": t_content, "position": (x, y + 5)})
-                    x += text_size
+                    position_list.append({"info_type": "img", "content": t_content, "position": (x, y)})
+                    x += t_content.size[0]
                     if x > x_constraint:
                         x = start_x
                         y += y_interval
@@ -297,6 +299,7 @@ class TextRender:
             # 如果是emoji
             if text[i] in self.emoji_list:
                 # 获取emoji大小
+                # print(text[i],text[i+1])
                 size = self.emoji_font.getsize(text[i])
                 # 新建一个图片来承载emoji
                 img = Image.new("RGBA", size)

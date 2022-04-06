@@ -10,7 +10,7 @@ from dynamicrender.Logger import logger
 from dynamicrender.Renderer.FooterRenderer import FooterRender
 from dynamicrender.Renderer.HeaderRenderer import HeaderRender
 from dynamicrender.Renderer.TextRenderer import TextRender
-
+from dynamicrender.Renderer.AdditionRenderer import AdditionRender
 
 class BiliRender:
     def __init__(self, dynamic: Item):
@@ -118,6 +118,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -138,6 +139,7 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
