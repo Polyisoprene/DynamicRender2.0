@@ -4,6 +4,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
+import emoji
 import httpx
 from PIL import ImageFont, Image, ImageDraw
 from fontTools.ttLib import TTFont
@@ -19,11 +20,6 @@ class AdditionRender:
         self.content = None
         self.draw = None
         self.standby_font = None
-        # self.main_font_size = None
-        # self.sub_font_color = None
-        # self.main_font_color = None
-        # self.extra_color = None
-        # self.sub_font_size = None
         self.main_font = None
         self.config = None
         self.repost_color = None
@@ -58,24 +54,6 @@ class AdditionRender:
                                              emoji_font_size)
         addition_img = await self.addition_type[self.dynamic.additional.type]()
         return addition_img
-        # # 读取主字体颜色
-        # self.main_font_color = self.config.get("Color", "main_font_color")
-        # # 读取sub_color颜色
-        # self.sub_font_color = self.config.get("Color", "sub_font_color")
-        # # 读取其他颜色
-        # self.extra_color = self.config.get("Color", "extra_color")
-        # # 读取主字体
-        # self.main_font_name = self.config.get("Font", "main_font")
-        # # 读取备用字体
-        # self.standby_font = self.config.get("Font", "standby_font")
-        # # 读取emoji字体
-        # self.emoji_font = self.config.get("Font", "emoji_font")
-        # # 读取主字体字号
-        # self.main_font_size = self.config.getint("Size", "main_font_size")
-        # # 读取副标题的字号
-        # self.sub_font_size = self.config.getint("Size", "sub_font_size")
-        # # 读取emoji字号
-        # self.emoji_font_size = self.config.getint("Size", "emoji_font_size")
 
     async def additional_reserve(self):
         """预约类型ADDITIONAL"""
@@ -83,6 +61,7 @@ class AdditionRender:
         title = self.dynamic.additional.reserve.title
         desc_first = self.dynamic.additional.reserve.desc1.text
         desc_second = self.dynamic.additional.reserve.desc2.text
+        badge_text = self.dynamic.additional.reserve.button.check.text
         # 读取字体配置
         # 主字体名
         main_font_name = self.config.get("Font", "main_font")
@@ -108,21 +87,39 @@ class AdditionRender:
         else:
             self.content = Image.new("RGBA", (1040, 116), self.main_color)
         self.draw = ImageDraw.Draw(self.content)
+        title_emoji_info = emoji.emoji_lis(title)
+        title_emoji_list = []
+        if title_emoji_info:
+            # 将所有emoji内容放进列表内
+            for i in title_emoji_info:
+                title_emoji_list.append(i["emoji"])
+            temp = []
+            for i in title_emoji_list:
+                if len(i) != 1:
+                    emoji_first = i[0]
+                    title = title.replace(i, emoji_first)
+                    temp.append(emoji_first)
+                    continue
+                else:
+                    temp.append(i)
+                    continue
+            title_emoji_list = temp
+
         position_info = await self.calculate_position(start_x=24, start_y=20, x_constraint=1000, y_constraint=50,
                                                       text_size=main_font_size, text=title,
                                                       main_font_name=main_font_name,
                                                       standby_font_name=standby_font_name,
                                                       font_color=main_font_color,
-                                                      emoji_list=[])
+                                                      emoji_list=title_emoji_list)
         task_list = []
         for i in position_info:
             task_list.append(self.draw_pic(i))
         await asyncio.gather(*task_list)
         button = Image.new("RGBA", (128, 56), "#00a0d8")
         draw = ImageDraw.Draw(button)
-        size = self.main_font.getsize("预约")
-        draw.text((int((button.size[0] - size[0]) / 2), int((button.size[1] - size[1]) / 2)), text="预约",
-                  size=main_font_size, fill=(255, 255, 255, 0), font=self.main_font)
+        size = self.main_font.getsize(badge_text)
+        draw.text((int((button.size[0] - size[0]) / 2), int((button.size[1] - size[1]) / 2)), text=badge_text,
+                  size=main_font_size, fill=(255, 255, 255, 255), font=self.main_font)
         sub_font = ImageFont.truetype(os.path.join(self.current_path, "Static", "Font", main_font_name), sub_font_size)
         self.draw.text((24, 72), desc_first + "   " + desc_second, fill=sub_font_color, font=sub_font)
         self.content.paste(button, (888, int((self.content.size[1] - 56) / 2)), button)
@@ -146,7 +143,7 @@ class AdditionRender:
             self.content = Image.new("RGBA", (1040, 160), self.repost_color)
             self.container = Image.new("RGBA", (1040, 196), self.main_color)
         container_draw = ImageDraw.Draw(self.container)
-        container_draw.text(xy=(5, 0), text=head_text, fill=extra_color,
+        container_draw.text(xy=(5, 5), text=head_text, fill=extra_color,
                             font=ImageFont.truetype(os.path.join(self.current_path, "Static", "Font", main_font_name),
                                                     size=int(sub_font_size * 0.8)))
         tasks = []
@@ -240,11 +237,11 @@ class AdditionRender:
         draw = ImageDraw.Draw(button)
         size = sub_font.getsize(button_text)
         draw.text((int((128 - size[0]) / 2), int((56 - size[1]) / 2) - 5), text=button_text,
-                  size=sub_font_size, fill=(255, 255, 255, 0), font=sub_font)
+                  size=sub_font_size, fill=(255, 255, 255, 255), font=sub_font)
         self.content.paste(button, (888, int((self.content.size[1] - 64) / 2)))
         # 写入head_text
         container_draw = ImageDraw.Draw(self.container)
-        container_draw.text(xy=(5, 0), text=head_text, fill=extra_color, font=sub_font)
+        container_draw.text(xy=(5, 5), text=head_text, fill=extra_color, font=sub_font)
         self.container.paste(self.content, (0, 36))
 
         return self.container
@@ -359,7 +356,7 @@ class AdditionRender:
         font_key = TTFont(main_font_path, fontNumber=0)['cmap'].tables[0].ttFont.getBestCmap().keys()
         for i in text:
             if i in emoji_list:
-                size = self.emoji_font.getsize(text[i])
+                size = self.emoji_font.getsize(i)
                 img = Image.new("RGBA", size)
                 draw = ImageDraw.Draw(img)
                 draw.text(xy=(0, 0), text=i, font=self.emoji_font, embedded_color=True)
@@ -426,7 +423,7 @@ class AdditionRender:
             self.draw.text(xy=word_info["position"], text=word_info["content"], fill=word_info["color"],
                            font=font[word_info["font"]])
         else:
-            self.content.past(word_info["content"], word_info["position"])
+            self.content.paste(word_info["content"], word_info["position"],word_info["content"])
 
     def get_img(self, url):
         response = self.client.get(url)

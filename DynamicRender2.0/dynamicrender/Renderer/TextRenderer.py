@@ -298,8 +298,6 @@ class TextRender:
                     continue
             # 如果是emoji
             if text[i] in self.emoji_list:
-                # 获取emoji大小
-                # print(text[i],text[i+1])
                 size = self.emoji_font.getsize(text[i])
                 # 新建一个图片来承载emoji
                 img = Image.new("RGBA", size)
