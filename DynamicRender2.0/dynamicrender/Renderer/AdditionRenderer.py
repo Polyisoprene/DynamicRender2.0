@@ -1,6 +1,7 @@
 import asyncio
 import configparser
 import os
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
@@ -9,6 +10,7 @@ import httpx
 from PIL import ImageFont, Image, ImageDraw
 from fontTools.ttLib import TTFont
 
+from dynamicrender.Logger import logger
 from ..DynamicChecker.ModulesChecker import ModuleDynamic
 
 
@@ -52,8 +54,12 @@ class AdditionRender:
         # emoji字体
         self.emoji_font = ImageFont.truetype(os.path.join(self.current_path, "Static", "Font", emoji_font_name),
                                              emoji_font_size)
-        addition_img = await self.addition_type[self.dynamic.additional.type]()
-        return addition_img
+        try:
+            addition_img = await self.addition_type[self.dynamic.additional.type]()
+            return addition_img
+        except:
+            logger.error("\n" + traceback.format_exc())
+            return
 
     async def additional_reserve(self):
         """预约类型ADDITIONAL"""
@@ -423,7 +429,7 @@ class AdditionRender:
             self.draw.text(xy=word_info["position"], text=word_info["content"], fill=word_info["color"],
                            font=font[word_info["font"]])
         else:
-            self.content.paste(word_info["content"], word_info["position"],word_info["content"])
+            self.content.paste(word_info["content"], word_info["position"], word_info["content"])
 
     def get_img(self, url):
         response = self.client.get(url)

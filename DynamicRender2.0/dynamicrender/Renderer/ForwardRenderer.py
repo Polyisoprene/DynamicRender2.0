@@ -7,11 +7,10 @@ from PIL import Image
 
 from dynamicrender.DynamicChecker import Orig
 from dynamicrender.Logger import logger
-from dynamicrender.Renderer.FooterRenderer import FooterRender
-from dynamicrender.Renderer.HeaderRenderer import HeaderRender
-from dynamicrender.Renderer.TextRenderer import TextRender
 from dynamicrender.Renderer.AdditionRenderer import AdditionRender
+from dynamicrender.Renderer.HeaderRenderer import HeaderRender
 from dynamicrender.Renderer.MajorRenderer import MajorRender
+from dynamicrender.Renderer.TextRenderer import TextRender
 
 
 class ForwardRender:
@@ -33,15 +32,18 @@ class ForwardRender:
                              "DYNAMIC_TYPE_NONE": self.none_dynamic
                              }
 
-
     async def render(self):
         current_path = os.getcwd()
         config = configparser.ConfigParser()
         config_path = os.path.join(current_path, "config.ini")
         config.read(config_path)
-        self.__main_color = config.get("Color", "repost_color")
-        img = await self.function_dic[self.__dynamic.type]()
-        return img
+        try:
+            self.__main_color = config.get("Color", "repost_color")
+            img = await self.function_dic[self.__dynamic.type]()
+            return img
+        except:
+            logger.error("\n" + traceback.format_exc())
+            return
 
     async def word_dynamic(self):
         """
@@ -50,10 +52,10 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -71,11 +73,11 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -93,11 +95,11 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -115,11 +117,11 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -137,8 +139,8 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -156,8 +158,8 @@ class ForwardRender:
        """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -175,10 +177,10 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -196,9 +198,9 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
                 tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             result = await asyncio.gather(*tasks)
@@ -218,11 +220,11 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -240,11 +242,11 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -262,11 +264,11 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -284,11 +286,11 @@ class ForwardRender:
         """
         try:
             tasks = []
-            tasks.append(HeaderRender(self.__dynamic.modules.module_author,forward=True).origin_header_render())
-            tasks.append(TextRender(self.__dynamic.modules.module_dynamic,forward=True).main_text_render())
-            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major,forward=True).major_render())
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author, forward=True).origin_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic, forward=True).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major, forward=True).major_render())
             if self.__dynamic.modules.module_dynamic.additional:
-                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic,forward=True).addition_render())
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic, forward=True).addition_render())
             result = await asyncio.gather(*tasks)
             if result:
                 img = await self.assemble_card(result)
@@ -298,7 +300,6 @@ class ForwardRender:
         except:
             logger.error("\n" + traceback.format_exc())
             return
-
 
     async def none_dynamic(self):
         try:
@@ -312,12 +313,13 @@ class ForwardRender:
         except:
             logger.error("\n" + traceback.format_exc())
             return
+
     async def assemble_card(self, result):
         y = 0
         for i in result:
             if i:
                 y += i.size[1]
-        container = Image.new("RGBA", (1088, y+20), self.__main_color)
+        container = Image.new("RGBA", (1088, y + 20), self.__main_color)
         position_y = 0
         for z in range(len(result)):
             if z != 0:
@@ -326,10 +328,6 @@ class ForwardRender:
             if result[z]:
                 container.paste(result[z], (int((container.size[0] - result[z].size[0]) / 2), position_y))
         return container
-
-
-
-
 
 # if __name__ == '__main__':
 #     print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

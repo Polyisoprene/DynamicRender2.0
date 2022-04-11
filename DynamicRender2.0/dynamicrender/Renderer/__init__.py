@@ -55,7 +55,6 @@ class BiliRender:
         curren_abs_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         if not os.path.exists(static_path):
             try:
-
                 logger.info("创建静态文件目录")
                 os.makedirs(static_path)
                 self.copy_dir(os.path.join(curren_abs_path, "Static"), static_path)
@@ -87,7 +86,7 @@ class BiliRender:
                 'repost_color': '#d5d3cf',
                 'main_font_color': 'black',
                 'sub_font_color': '#99a2aa',
-                'extra_color': '#848484'
+                'extra_color': '#00a1d6'
             }
             config["Size"] = {
                 'uname_font_size': 32,
@@ -443,5 +442,4 @@ class BiliRender:
             return False
 
 
-# if __name__ == '__main__':
-#     print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+

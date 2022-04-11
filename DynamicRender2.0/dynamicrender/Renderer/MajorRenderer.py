@@ -152,7 +152,7 @@ class MajorRender:
         draw = ImageDraw.Draw(content)
         size = sub_font.getsize(tips)
 
-        draw.text(xy=(10, int((40-size[1])/2)), text=tips, fill=sub_font_color, font=sub_font)
+        draw.text(xy=(10, int((40 - size[1]) / 2)), text=tips, fill=sub_font_color, font=sub_font)
 
         return content
 
@@ -613,7 +613,7 @@ class MajorRender:
         desc = self.major.common.desc
         cover_img = self.__get_pic({"url": cover})
         self.content = Image.new("RGBA", (1040, 160), color)
-        self.content.paste(cover_img, (0, 0),cover_img)
+        self.content.paste(cover_img, (0, 0), cover_img)
         self.main_font = ImageFont.truetype(font=os.path.join(self.current_path, "Static", "Font", main_font_name),
                                             size=main_font_size)
         self.standby_font = ImageFont.truetype(
@@ -686,11 +686,20 @@ class MajorRender:
         return self.content
 
     def __get_pic(self, img_info):
-        response = self.client.get(img_info["url"])
-        img = Image.open(BytesIO(response.content)).convert("RGBA")
-        if "size" in img_info.keys():
-            img = img.resize(img_info["size"], Image.ANTIALIAS)
-        return img
+        try:
+            response = self.client.get(img_info["url"], timeout=500)
+            img = Image.open(BytesIO(response.content)).convert("RGBA")
+            if "size" in img_info.keys():
+                img = img.resize(img_info["size"], Image.ANTIALIAS)
+            return img
+        except:
+            logger.error(traceback.print_exc())
+            response = httpx.get(img_info["url"], timeout=500)
+            img = Image.open(BytesIO(response.content)).convert("RGBA")
+            if "size" in img_info.keys():
+                img = img.resize(img_info["size"], Image.ANTIALIAS)
+            return img
+
 
     async def __calculate_position(self, start_x, start_y, x_constraint, y_constraint, text_size, text,
                                    emoji_list=None, main_font_name=None, standby_font_name=None,
@@ -717,6 +726,7 @@ class MajorRender:
         main_font = ImageFont.truetype(main_font_path, size=text_size)
         standby_font = ImageFont.truetype(standby_font_path, size=text_size)
         font_key = TTFont(main_font_path, fontNumber=0)['cmap'].tables[0].ttFont.getBestCmap().keys()
+        text = text.replace("\r", "")
         for i in range(len(text)):
             if text[i] in emoji_list:
                 emoji_size = self.emoji_font.getsize(text[i])

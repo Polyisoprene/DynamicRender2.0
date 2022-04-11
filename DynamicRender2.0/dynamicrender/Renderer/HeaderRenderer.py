@@ -111,42 +111,45 @@ class HeaderRender:
             logger.error("\n" + traceback.format_exc())
 
     async def origin_header_render(self):
-        # 获取程序当前运行路径
-        config = configparser.ConfigParser()
-        # 读取配置文件
-        config.read(os.path.join(self.__current_path, "config.ini"))
-        # 读取背景颜色
-        repost_color = config.get("Color", "repost_color")
-        # 读取字体
-        main_font_name = config.get("Font", "main_font")
-        # 读取昵称的字号
-        uname_size = config.getint("Size", "main_font_size")
-        # 读取昵称颜色
-        uname_color = config.get("Color", "extra_color")
+        try:
+            # 获取程序当前运行路径
+            config = configparser.ConfigParser()
+            # 读取配置文件
+            config.read(os.path.join(self.__current_path, "config.ini"))
+            # 读取背景颜色
+            repost_color = config.get("Color", "repost_color")
+            # 读取字体
+            main_font_name = config.get("Font", "main_font")
+            # 读取昵称的字号
+            uname_size = config.getint("Size", "main_font_size")
+            # 读取昵称颜色
+            uname_color = config.get("Color", "extra_color")
 
-        # 获取昵称及头像
-        render_info_list = [{"type": "text",
-                             "font_color": uname_color,
-                             "font_size": uname_size,
-                             "content": self.__author.name,
-                             "font": main_font_name,
-                             "position": (80, 15)}]
-        url_list = [{"type": "face", "url": self.__author.face + "@240w_240h_1c_1s.webp",
-                     "path": os.path.join(self.__current_path, "Cache", "Face", str(self.__author.mid) + ".webp")}]
-        # 获取头像和pendant
-        self.__session = httpx.Client()
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            results = pool.map(self.__get_images, url_list)
-        for result in results:
-            render_info_list.append(result)
-        self.__session.close()
-        self.__container = Image.new("RGBA", (1088, 70), repost_color)
-        self.__draw = ImageDraw.Draw(self.__container)
-        tasks = []
-        for i in render_info_list:
-            tasks.append(self.__assembly_header(i))
-        await asyncio.gather(*tasks)
-        return self.__container
+            # 获取昵称及头像
+            render_info_list = [{"type": "text",
+                                 "font_color": uname_color,
+                                 "font_size": uname_size,
+                                 "content": self.__author.name,
+                                 "font": main_font_name,
+                                 "position": (80, 15)}]
+            url_list = [{"type": "face", "url": self.__author.face + "@240w_240h_1c_1s.webp",
+                         "path": os.path.join(self.__current_path, "Cache", "Face", str(self.__author.mid) + ".webp")}]
+            # 获取头像和pendant
+            self.__session = httpx.Client()
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = pool.map(self.__get_images, url_list)
+            for result in results:
+                render_info_list.append(result)
+            self.__session.close()
+            self.__container = Image.new("RGBA", (1088, 70), repost_color)
+            self.__draw = ImageDraw.Draw(self.__container)
+            tasks = []
+            for i in render_info_list:
+                tasks.append(self.__assembly_header(i))
+            await asyncio.gather(*tasks)
+            return self.__container
+        except:
+            logger.error("\n" + traceback.format_exc())
 
     def __get_images(self, img_info):
         if img_info["type"] == "face":
