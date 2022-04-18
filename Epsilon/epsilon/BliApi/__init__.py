@@ -5,6 +5,7 @@ from typing import Optional, Union
 from urllib.parse import urlsplit
 
 import httpx
+from dynamicrender.DynamicChecker import Item
 from nonebot import logger
 
 
@@ -17,6 +18,29 @@ class Api:
             'Referer': 'https://www.bilibili.com/'
 
         }
+
+    async def get_short_link(self, long_url):
+        """
+        获取短链接
+        :param long_url:
+        :return:
+        """
+        async with httpx.AsyncClient(headers=self.headers) as session:
+            try:
+                url = "https://api.bilibili.com/x/share/click"
+                data = {'build': '9331',
+                        'buvid': '74fe03588ceace988e365fd982bd0955',
+                        'oid': long_url,
+                        'platform': 'ios',
+                        'share_channel': 'COPY',
+                        'share_id': 'public.webview.0.0.pv',
+                        'share_mode': '3'}
+                response = await session.post(url, data=data)
+                response = response.json()
+                return response["data"]["content"]
+            except Exception as e:
+                logger.error(traceback.print_exc())
+                return
 
     async def get_uid_info(self, uid) -> Optional[dict]:
         """
@@ -107,6 +131,29 @@ class Api:
             logger.error(traceback.print_exc())
             return
 
+    async def get_location(self, url: str):
+        """通过短链接获取动态链接"""
+        try:
+            async with httpx.AsyncClient() as client:
+                url = url
+                response = await client.get(url, headers=self.headers)
+            return response.headers.get("location")
+        except TimeoutError as e:
+            logger.error(traceback.print_exc())
+            return
+
+    async def get_single_dynamic(self, url: str):
+        try:
+            async with httpx.AsyncClient() as client:
+                url = url
+                response = await client.get(url, headers=self.headers)
+            dynamic = response.json()
+            dynamic_item = dynamic["data"]["item"]
+            item = Item(**dynamic_item)
+            return item
+        except Exception as e:
+            logger.error(traceback.print_exc())
+            return
     # async def thumb(self, cookie: dict, dynamic_id: str):
     #     """
     #     点赞
@@ -202,6 +249,7 @@ class ApiWebLogin:
         except TimeoutError as e:
             logger.error(traceback.print_exc())
             return
+
     # endregion
 
 

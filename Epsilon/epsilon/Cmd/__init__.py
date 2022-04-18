@@ -1,3 +1,4 @@
+from nonebot import on_regex
 from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
 from nonebot.params import CommandArg
 from nonebot.permission import SuperUser
@@ -28,7 +29,7 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, GuildMessageEvent], args: 
     else:
         if args:
             if str(args).isdigit():
-                message = await add_sub(event, bot, str(args))
+                message = await add_sub(event=event, bot=bot, uid = str(args))
                 await append_sub.finish(message)
             else:
                 await append_sub.finish("请携带正确的UID")
@@ -82,7 +83,7 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, GuildMessageEvent], args: 
     else:
         if args:
             if str(args).isdigit():
-                message = await change_live_push_status(event, bot, str(args), 2)
+                message = await change_live_push_status(event, bot, str(args), 0)
                 await live_push_off.finish(message)
             else:
                 await live_push_off.finish("请输入正确的UID")
@@ -118,7 +119,7 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, GuildMessageEvent], args: 
     else:
         if args:
             if str(args).isdigit():
-                message = await change_dynamic_push_status(event, bot, str(args), 2)
+                message = await change_dynamic_push_status(event, bot, str(args), 0)
                 await dynamic_push_off.finish(message)
             else:
                 await dynamic_push_off.finish("请输入正确的UID")
@@ -182,3 +183,13 @@ async def _(bot: Bot, event: Union[GroupMessageEvent, GuildMessageEvent]):
     if message:
         await bot.send(event, message=message)
     await show_all_sub.finish()
+
+
+dynamic_to_pic = on_regex("https:\/\/b23.tv\/")
+
+@dynamic_to_pic.handle()
+async def _(bot: Bot, event: Union[GroupMessageEvent, GuildMessageEvent]):
+    img = await share_to_pic(event, bot)
+    if img:
+        await dynamic_to_pic.send(message=img)
+    await dynamic_to_pic.finish()

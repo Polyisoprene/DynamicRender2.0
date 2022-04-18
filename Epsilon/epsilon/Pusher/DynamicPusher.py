@@ -50,15 +50,16 @@ class PushDynamic:
             if not result:
                 with DataManage() as store:
                     await store.store_dynamic_id(dynamic_id, pub_ts)
-                with DataManage() as acquire:
-                    subscribe_info = await acquire.acquire_subinfo_by_uid(mid)
-                if subscribe_info:
-                    all_sub_group = json.loads(subscribe_info[3])
-                    message = await self.__formate_message(item)
-                    tasks = []
-                    for k, v in all_sub_group.items():
-                        tasks.append(self.__send_checker(message, k, v))
-                    await asyncio.gather(*tasks)
+                if item.type != "DYNAMIC_TYPE_LIVE_RCMD":
+                    with DataManage() as acquire:
+                        subscribe_info = await acquire.acquire_subinfo_by_uid(mid)
+                    if subscribe_info:
+                        all_sub_group = json.loads(subscribe_info[3])
+                        message = await self.__formate_message(item)
+                        tasks = []
+                        for k, v in all_sub_group.items():
+                            tasks.append(self.__send_checker(message, k, v))
+                        await asyncio.gather(*tasks)
 
 
     async def __formate_message(self, item: Item) -> Message:

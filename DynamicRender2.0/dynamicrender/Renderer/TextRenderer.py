@@ -200,7 +200,8 @@ class TextRender:
                 emoji_list.append(i)
             self.client.close()
         # 去除特殊符号
-        text = text.replace("\r", "").replace(chr(65039), "").replace(chr(65038), "")
+        text = text.translate(str.maketrans({'\r': '', chr(65039): '', chr(65038): '', chr(8205): ''}))
+        # text = text.replace({})   ("\r", "").replace(chr(65039), "").replace(chr(65038), "")
         # 将组合emoji替换成emoji的第一个
         if self.emoji_list:
             temp = []

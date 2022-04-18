@@ -67,7 +67,7 @@ class AdditionRender:
         title = self.dynamic.additional.reserve.title
         desc_first = self.dynamic.additional.reserve.desc1.text
         desc_second = self.dynamic.additional.reserve.desc2.text
-        badge_text = self.dynamic.additional.reserve.button.check.text
+        badge_text = self.dynamic.additional.reserve.button.check.text if self.dynamic.additional.reserve.button.status ==2 else self.dynamic.additional.reserve.button.uncheck.text
         # 读取字体配置
         # 主字体名
         main_font_name = self.config.get("Font", "main_font")

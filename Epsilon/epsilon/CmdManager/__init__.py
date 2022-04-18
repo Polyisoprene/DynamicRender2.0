@@ -7,7 +7,8 @@ import traceback
 from io import BytesIO
 from typing import Union
 from urllib.parse import urlsplit
-
+import re
+from dynamicrender.Renderer import BiliRender
 import qrcode
 from PIL import ImageFont, Image, ImageDraw
 from nonebot import Bot
@@ -20,10 +21,15 @@ from ..DataManager import DataManage
 from ..MessageManager import MessageSender
 
 
-async def check_bot_status(event: Union[GroupMessageEvent, GuildMessageEvent], bot: Bot, other=None,
-                           other_2=None) -> bool:
+async def check_bot_status(*args, **kwargs) -> bool:
     """检查开关状态函数"""
     # 查看这个群是否开启了开关
+    if kwargs:
+        event: Union[GroupMessageEvent, GuildMessageEvent] = kwargs["event"]
+        bot: Bot = kwargs["bot"]
+    else:
+        event: Union[GroupMessageEvent, GuildMessageEvent] = args[0]
+        bot: Bot = args[1]
     if event.message_type == "group":
         position = str(event.group_id)
     else:
@@ -59,7 +65,6 @@ async def check_cookie():
 
 def bot_checker(func):
     """检查bot开关的装饰器"""
-
     async def inner(*args, **kwargs):
         bot_status = await check_bot_status(*args, **kwargs)
         if bot_status:
@@ -166,7 +171,7 @@ async def add_sub(event: Union[GroupMessageEvent, GuildMessageEvent], bot: Bot, 
             else:
                 sub_group[position][bot_id] = {"DynamicOn": 1, "LiveOn": 1}
                 with DataManage() as update:
-                    await update.modify_subinfo(uid, sub_info=sub_group)
+                    await update.modify_subinfo(uid, sub_info=json.dumps(sub_group))
                 message = f"成功添加：{sub_info_uid[1]}({uid})"
         else:
             bot_info = {bot_id: {"DynamicOn": 1, "LiveOn": 1}}
@@ -397,3 +402,35 @@ async def help_info(event: Union[GroupMessageEvent, GuildMessageEvent], bot: Bot
     binary_content = img_byte.getvalue()
     img_base64 = "base64://{}".format(str(base64.b64encode(binary_content), "utf8"))
     return MessageSegment.image(img_base64)
+
+@bot_checker
+async def share_to_pic(event: Union[GroupMessageEvent, GuildMessageEvent], bot: Bot):
+    short_link = re.search("https://b23\.tv/(\w+)", str(event.get_message()))
+    if short_link.group():
+        data = await Api().get_location(short_link.group())
+        try:
+            if data:
+                m_link = re.search("https://m.bilibili.com/dynamic/(\d+)", data)
+                if m_link:
+                    m_link = m_link.group()
+                    m_link = m_link.replace("https://m.bilibili.com/dynamic/",
+                                            "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail?timezone_offset=-480&id=")
+                    item = await Api().get_single_dynamic(m_link)
+                    if item:
+                        img = await BiliRender(item).render()
+                        img_byte = BytesIO()
+                        img.save(img_byte, format='PNG')
+                        binary_content = img_byte.getvalue()
+                        img_base64 = "base64://{}".format(str(base64.b64encode(binary_content), "utf8"))
+                        return MessageSegment.image(img_base64)
+                    else:
+                        return
+                else:
+                    return
+            else:
+                return 
+        except:
+            logger.error(traceback.print_exc())
+            return
+
+

@@ -43,7 +43,7 @@ class Emoji(BaseModel):
 class PicItem(BaseModel):
     height: Optional[int]
     width: Optional[int]
-    size: Union[int, float]
+    size: Union[int, float, None]
     src: Optional[AnyUrl]
 
 
@@ -92,6 +92,9 @@ class AddOnButton(BaseModel):
 
 class ReserveButton(BaseModel):
     check: Optional[ReserveCheck]
+    status: Optional[int]
+    type: Optional[int]
+    uncheck: Optional[ReserveCheck]
 
 
 # 三级
@@ -277,7 +280,7 @@ class Pendant(BaseModel):
     expire: Optional[int]
     image: Union[AnyUrl, str, None]
     image_enhance: Union[AnyUrl, str, None]
-    name: str
+    name: Optional[str]
 
 
 class Vip(BaseModel):
@@ -380,9 +383,9 @@ class ModuleAuthor(BaseModel):
     name: Optional[str] = None
     official_verify: Optional[OfficialVerify] = None
     pendant: Optional[Pendant] = None
-    pub_time: Optional[str]=None
-    pub_ts:Optional[int]=None
-    type: Optional[str] =None
+    pub_time: Optional[str] = None
+    pub_ts: Optional[int] = None
+    type: Optional[str] = None
     vip: Optional[Vip]
 
 

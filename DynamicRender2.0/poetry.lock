@@ -399,6 +399,11 @@ python-versions = ">=3.6.8"
 [package.extras]
 diagrams = ["railroad-diagrams", "jinja2"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.doubanio.com/simple"
+reference = "douban"
+
 [[package]]
 name = "pytest"
 version = "5.4.3"

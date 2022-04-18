@@ -1,38 +1,32 @@
 import asyncio
+import httpx
+from dynamicrender.DynamicChecker import Item
+from dynamicrender.Renderer import BiliRender
 import matplotlib.pyplot as plt
 import time
-import json
 
 def img_show(img):
 
     plt.imshow(img)
     plt.show()
 
-if __name__ == '__main__':
-    import httpx
-    from dynamicrender.DynamicChecker import Item
-    from dynamicrender.Renderer import BiliRender
 
 
-    def time_log(func):
-        async def wrap(*args, **kwargs):
-            start = time.time()
-            result = await func(*args, **kwargs)
-            print("程序花费时长:"+str(time.time()-start))
-            return result
-        return wrap
+async def main():
+    url = "https://app.bilibili.com/x/topic/web/details/cards?topic_id=28484&sort_by=3&offset=&page_size=20&source=Web"
+    response = httpx.get(url)
+    data = response.json()
+    # print(data)
+    items = data["data"]["topic_card_list"]["items"]
+    tasks = []
 
-    @time_log
-    async def run():
-        url = "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail?timezone_offset=-480&id=647670184872509449"
-        resp = httpx.get(url)
-        data = resp.json()
-        item = data["data"]["item"]
-        dynamic = Item(**item)
-        start = time.time()
-        re = await BiliRender(dynamic=dynamic).render()
-        print(time.time() - start)
-        if re:
-            img_show(re)
-    asyncio.run(run())
+    for item in items:
+        dynamic = item["dynamic_card_item"]
+        card = Item(**dynamic)
+        # start = time.time()
+        img = await BiliRender(card).render()
+        end = time.time()
+        # print(end - start)
+        img_show(img)
 
+asyncio.run(main())

@@ -130,9 +130,9 @@ class DataManage:
         data = (uid,)
         self.cursor.execute(del_sql, data)
 
-    async def modify_subinfo(self, uid: str, sub_info) -> None:
+    async def modify_subinfo(self, uid: str, sub_info:str) -> None:
         modify_sql = "update SubInfoReserve set SubGroup = ? where UID=?"
-        data = (sub_info, uid,)
+        data = (sub_info, int(uid),)
         self.cursor.execute(modify_sql, data)
 
     async def modify_live_status(self, uid: int, live_status) -> None:

@@ -1,10 +1,10 @@
 import traceback
+from typing import Union, Optional
 
 import nonebot
 from nonebot import logger
-from typing import Union, Optional
-from nonebot_plugin_guild_patch import GuildMessageEvent
 from nonebot.adapters.onebot.v11 import MessageSegment, GroupMessageEvent, Bot, Message
+from nonebot_plugin_guild_patch import GuildMessageEvent
 
 
 class MessageSender:
@@ -47,5 +47,4 @@ class MessageSender:
         if self.__event:
             await self.__bot.call_api("send_group_msg",**{"group_id": self.__event.group_id, "message": self.__message})
         else:
-            await self.__bot.call_api("send_group_msg",
-                                      **{"group_id": group_id, "message": self.__message})
+            await self.__bot.call_api("send_group_msg", **{"group_id": group_id, "message": self.__message})

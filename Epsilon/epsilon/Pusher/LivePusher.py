@@ -36,10 +36,14 @@ class PushLive:
                 await update.modify_live_status(uid, new_status)
             sub_info = json.loads(info_dict[str(uid)]["sub_info"])
             live_room_link = "https://live.bilibili.com/" + str(single_room_info["room_id"])
-            cover = single_room_info["cover_from_user"] if single_room_info["cover_from_user"] else single_room_info[
-                "keyframe"]
-            message = f"【{single_room_info['uname']}】开播啦!!!\n\n标题:{single_room_info['title']}\n\n传送门:{live_room_link}\n" + MessageSegment.image(
-                cover)
+            short_room_link = await Api().get_short_link(live_room_link)
+            cover_link = single_room_info["cover_from_user"] if single_room_info["cover_from_user"] else single_room_info["keyframe"]
+            if short_room_link:
+                message = f"【{single_room_info['uname']}】开播啦!!!\n\n标题:{single_room_info['title']}\n\n传送门:{short_room_link}\n" + MessageSegment.image(
+                    cover_link)
+            else:
+                message = f"【{single_room_info['uname']}】开播啦!!!\n\n标题:{single_room_info['title']}\n\n传送门:{live_room_link}\n" + MessageSegment.image(
+                    cover_link)
             for k, v in sub_info.items():
                 await self.__send_checker(message, k, v)
         else:
@@ -58,7 +62,7 @@ class PushLive:
         try:
             bot_status = await self.__check_bot_status(position, bot_id)
             if bot_status:
-                if sub_info["DynamicOn"] == 1:
+                if sub_info["LiveOn"] == 1:
                     if position.isdigit():
                         await MessageSender(message=message, bot_id=bot_id).send_to("group", position)
                     else:

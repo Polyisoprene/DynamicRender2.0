@@ -726,7 +726,8 @@ class MajorRender:
         main_font = ImageFont.truetype(main_font_path, size=text_size)
         standby_font = ImageFont.truetype(standby_font_path, size=text_size)
         font_key = TTFont(main_font_path, fontNumber=0)['cmap'].tables[0].ttFont.getBestCmap().keys()
-        text = text.replace("\r", "")
+        # text = text.replace("\r", "").replace(chr(65039),'').replace(chr(65038),'')
+        text = text.translate(str.maketrans({'\r': '', chr(65039): '', chr(65038): '', chr(8205): ''}))
         for i in range(len(text)):
             if text[i] in emoji_list:
                 emoji_size = self.emoji_font.getsize(text[i])
