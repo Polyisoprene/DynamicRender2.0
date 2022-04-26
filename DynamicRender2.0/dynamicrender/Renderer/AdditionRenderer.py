@@ -111,7 +111,7 @@ class AdditionRender:
                     continue
             title_emoji_list = temp
 
-        position_info = await self.calculate_position(start_x=24, start_y=20, x_constraint=1000, y_constraint=50,
+        position_info = await self.calculate_position(start_x=24, start_y=20, x_constraint=850, y_constraint=50,
                                                       text_size=main_font_size, text=title,
                                                       main_font_name=main_font_name,
                                                       standby_font_name=standby_font_name,
