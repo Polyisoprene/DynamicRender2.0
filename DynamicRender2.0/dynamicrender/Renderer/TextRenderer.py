@@ -1,6 +1,7 @@
 import configparser
 import os
 import re
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
@@ -9,6 +10,7 @@ import httpx
 from PIL import ImageFont, Image, ImageDraw
 from fontTools.ttLib.ttFont import TTFont
 
+from dynamicrender.Logger import logger
 from ..DynamicChecker.ModulesChecker import ModuleDynamic
 
 
@@ -196,8 +198,10 @@ class TextRender:
                 emoji_result = pool.map(self.get_emoji, emoji_info_list)
             for i in emoji_result:
                 emoji_list.append(i)
+            self.client.close()
         # 去除特殊符号
-        text = text.replace("\r", "")
+        text = text.translate(str.maketrans({'\r': '', chr(65039): '', chr(65038): '', chr(8205): ''}))
+        # text = text.replace({})   ("\r", "").replace(chr(65039), "").replace(chr(65038), "")
         # 将组合emoji替换成emoji的第一个
         if self.emoji_list:
             temp = []
@@ -207,8 +211,11 @@ class TextRender:
                     text = text.replace(i, emoji_first)
                     temp.append(emoji_first)
                     continue
-                temp.append(i)
+                else:
+                    temp.append(i)
+                    continue
             self.emoji_list = temp
+
         return {"content": text, "rich_text_content": info_list, "emoji_pics": emoji_list}
 
     async def calculate_rich_index(self, text, rich_text_info):
@@ -249,7 +256,6 @@ class TextRender:
         for i in range(len(text)):
             # 如果是图标
             if text[i] in self.rich_text_Instead:
-                # 如果这个特殊符号确实是文字不是图标
                 # 打开图标图片
                 t_content = Image.open(os.path.join(self.__base_path, "Static", "Picture",
                                                     tag_pic_list[str(self.rich_text_Instead.index(text[i]))])).convert(
@@ -265,10 +271,10 @@ class TextRender:
                 # 如果按照索引取不到图片就把content[i]当作字符
                 try:
                     t_content = img_list[self.emoji_pic_tag_instead.index(text[i])].resize(
-                        (text_size, text_size),
+                        (int(text_size * 1.5), int(text_size * 1.5)),
                         Image.ANTIALIAS)
-                    position_list.append({"info_type": "img", "content": t_content, "position": (x, y + 5)})
-                    x += text_size
+                    position_list.append({"info_type": "img", "content": t_content, "position": (x, y)})
+                    x += t_content.size[0]
                     if x > x_constraint:
                         x = start_x
                         y += y_interval
@@ -296,7 +302,6 @@ class TextRender:
                     continue
             # 如果是emoji
             if text[i] in self.emoji_list:
-                # 获取emoji大小
                 size = self.emoji_font.getsize(text[i])
                 # 新建一个图片来承载emoji
                 img = Image.new("RGBA", size)
@@ -357,7 +362,11 @@ class TextRender:
         if os.path.exists(emoji_cache_path):
             img = Image.open(emoji_cache_path).convert("RGBA")
         else:
-            response = self.client.get(emoji_info["url"])
+            try:
+                response = self.client.get(emoji_info["url"], timeout=800)
+            except:
+                logger.error(traceback.print_exc())
+                response = httpx.get(emoji_info["url"], timeout=800)
             with open(emoji_cache_path, "wb") as f:
                 f.write(response.content)
             img = Image.open(BytesIO(response.content)).convert("RGBA")

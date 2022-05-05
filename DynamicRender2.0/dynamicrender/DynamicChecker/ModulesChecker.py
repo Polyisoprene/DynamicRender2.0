@@ -1,4 +1,4 @@
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Any
 
 from pydantic import BaseModel, AnyUrl, Json
 
@@ -20,6 +20,18 @@ class LiveRecordInfo(BaseModel):
     pass
 
 
+class JumpStyle(BaseModel):
+    text: str
+
+
+class AddOnCommonCheck(BaseModel):
+    text: str
+
+
+class ReserveCheck(BaseModel):
+    text: str
+
+
 # 四级
 class Emoji(BaseModel):
     icon_url: Optional[AnyUrl]
@@ -31,7 +43,7 @@ class Emoji(BaseModel):
 class PicItem(BaseModel):
     height: Optional[int]
     width: Optional[int]
-    size: Union[int, float]
+    size: Union[int, float, None]
     src: Optional[AnyUrl]
 
 
@@ -71,6 +83,20 @@ class RichGoods(BaseModel):
     jump_url: str
 
 
+class AddOnButton(BaseModel):
+    type: int
+    jump_url: Optional[str]
+    jump_style: Optional[JumpStyle]
+    check: Optional[AddOnCommonCheck]
+
+
+class ReserveButton(BaseModel):
+    check: Optional[ReserveCheck]
+    status: Optional[int]
+    type: Optional[int]
+    uncheck: Optional[ReserveCheck]
+
+
 # 三级
 class Fan(BaseModel):
     color: Optional[str] = None
@@ -105,10 +131,10 @@ class Archive(BaseModel):
     badge: Optional[Badge]
     bvid: Optional[str]
     cover: Optional[AnyUrl]
-    desc: Optional[str]
+    desc: Optional[str] = None
     duration_text: Optional[str]
     stat: Optional[Stat]
-    title: Optional[str]
+    title: Optional[Any] = None
     type: Optional[int]
 
 
@@ -126,6 +152,7 @@ class Common(BaseModel):
     # |_biz_type
     #   |_0     活动       641222605723926534
     #   |_3     装扮       551309621391003098
+    #   |_111   分享的游戏  645309310073569287
     #   |_131   歌单       639296660796604438
     #   |_141   频道       631743110398869511
     #   |_201   漫画       639302493349609508
@@ -135,6 +162,7 @@ class Common(BaseModel):
     desc: Optional[str] = None
     style: Optional[int] = None
     label: Optional[str] = None
+    title: Optional[str]
 
 
 class LiveRcmd(BaseModel):
@@ -148,6 +176,7 @@ class Reserve(BaseModel):
     desc2: Optional[AddOnDesc] = None
     desc3: Optional[AddOnDesc] = None
     reserve_total: Optional[int]
+    button: Optional[ReserveButton]
 
 
 class Goods(BaseModel):
@@ -156,6 +185,7 @@ class Goods(BaseModel):
 
 
 class AddOnCommon(BaseModel):
+    button: Optional[AddOnButton]
     cover: Optional[AnyUrl]
     head_text: Optional[str]
     desc1: Optional[str] = None
@@ -219,6 +249,20 @@ class Live(BaseModel):
     reserve_type: int
 
 
+class Courses(BaseModel):
+    badge: Badge
+    cover: Optional[str]
+    desc: Optional[str]
+    sub_title: Optional[str]
+    title: Optional[str]
+
+
+class Music(BaseModel):
+    cover: str
+    label: str
+    title: str
+
+
 # 二级
 class Decorate(BaseModel):
     card_url: Union[AnyUrl, str, None]
@@ -236,7 +280,7 @@ class Pendant(BaseModel):
     expire: Optional[int]
     image: Union[AnyUrl, str, None]
     image_enhance: Union[AnyUrl, str, None]
-    name: str
+    name: Optional[str]
 
 
 class Vip(BaseModel):
@@ -295,6 +339,7 @@ class Major(BaseModel):
     # MAJOR_TYPE_NONE       直播结束            641187318269476881
     # MAJOR_TYPE_MEDIALIST  收藏夹             645144864367837192
     # MAJOR_TYPE_LIVE       分享直播
+    # MAJOR_TYPE_COURSES    付费课程
     type: Optional[str]
     # 图片类型动态专有
     draw: Optional[Draw]
@@ -314,6 +359,10 @@ class Major(BaseModel):
     medialist: Optional[MediaList]
     # 分享直播
     live: Optional[Live]
+    # 付费课程
+    courses: Optional[Courses]
+    # 音乐
+    music: Optional[Music]
 
 
 class Topic(BaseModel):
@@ -325,7 +374,7 @@ class Topic(BaseModel):
 # 一级
 class ModuleAuthor(BaseModel):
     decorate: Optional[Decorate] = None
-    face: Optional[AnyUrl] = None
+    face: Optional[str]
     face_nft: Optional[bool] = None
     following: Optional[int] = None
     jump_url: Union[AnyUrl, str, None] = None
@@ -334,9 +383,9 @@ class ModuleAuthor(BaseModel):
     name: Optional[str] = None
     official_verify: Optional[OfficialVerify] = None
     pendant: Optional[Pendant] = None
-    pub_time: str
-    pub_ts: int
-    type: str
+    pub_time: Optional[str] = None
+    pub_ts: Optional[int] = None
+    type: Optional[str] = None
     vip: Optional[Vip]
 
 

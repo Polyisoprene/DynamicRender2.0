@@ -14,9 +14,10 @@ from dynamicrender.Logger import logger
 
 
 class HeaderRender:
-    def __init__(self, author: ModuleAuthor):
+    def __init__(self, author: ModuleAuthor, forward=False):
         self.__container = None
         self.__draw = None
+        self.__forward = forward
         self.__author = author
         self.__current_path = os.getcwd()
         self.__font_path = os.path.join(self.__current_path, "Static", "Font")
@@ -28,7 +29,6 @@ class HeaderRender:
         :return:
         """
         try:
-            start = time.time()
             # 获取程序当前运行路径
             config = configparser.ConfigParser()
             # 读取配置文件
@@ -47,9 +47,15 @@ class HeaderRender:
             time_color = config.get("Color", "sub_font_color")
             # 格式化时间戳
             time_formate = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.__author.pub_ts))
+
+            try:
+                name_color = uname_color if not self.__author.vip.nickname_color else self.__author.vip.nickname_color
+            except:
+                name_color = uname_color
+
             # 将昵称和时间信息加入渲染信息列表
             render_info_list = [{"type": "text",
-                                 "font_color": uname_color if not self.__author.vip.nickname_color else self.__author.vip.nickname_color,
+                                 "font_color": name_color,
                                  "font_size": uname_size,
                                  "content": self.__author.name,
                                  "font": main_font_name,
@@ -61,7 +67,7 @@ class HeaderRender:
             url_list = [{"type": "face", "url": self.__author.face + "@240w_240h_1c_1s.webp",
                          "path": os.path.join(self.__current_path, "Cache", "Face", str(self.__author.mid) + ".webp")}]
             # 将挂件信息放入请求列表中
-            if self.__author.pendant.image:
+            if self.__author.pendant and self.__author.pendant.image:
                 url_list.append({"type": "pendant", "url": self.__author.pendant.image,
                                  "path": os.path.join(self.__current_path, "Cache", "Pendant",
                                                       self.__author.pendant.name + ".png")})
@@ -77,30 +83,71 @@ class HeaderRender:
                 render_info_list.append(result)
             self.__session.close()
             # 如果有官方认证的话
-            if self.__author.official_verify.type != -1:
+            if self.__author.official_verify and self.__author.official_verify.type != -1:
                 official_verify_path = [os.path.join(self.__current_path, "Static", "Picture", "official_yellow.png"),
                                         os.path.join(self.__current_path, "Static", "Picture", "official_blue.png")]
                 img = Image.open(official_verify_path[self.__author.official_verify.type]).resize((32, 32))
                 render_info_list.append({"type": "img", "content": img, "position": (100, 240)})
             # 没有官方认证则查看是否有大会员
             else:
-                avatar_subscript = self.__author.vip.avatar_subscript
-                if avatar_subscript and avatar_subscript != 0:
-                    avatar_path = {"2": os.path.join(self.__current_path, "Static", "Picture", "small_vip.png"),
-                                   "1": os.path.join(self.__current_path, "Static", "Picture", "big_vip.png")}[
-                        str(avatar_subscript)]
-                    avatar_img = Image.open(avatar_path).resize((32, 32)).convert("RGBA")
-                    render_info_list.append({"type": "img", "content": avatar_img, "position": (100, 240)})
+                if self.__author.vip:
+                    avatar_subscript = self.__author.vip.avatar_subscript
+                    if avatar_subscript and avatar_subscript != 0:
+                        avatar_path = {"2": os.path.join(self.__current_path, "Static", "Picture", "small_vip.png"),
+                                       "1": os.path.join(self.__current_path, "Static", "Picture", "big_vip.png")}[
+                            str(avatar_subscript)]
+                        avatar_img = Image.open(avatar_path).resize((32, 32)).convert("RGBA")
+                        render_info_list.append({"type": "img", "content": avatar_img, "position": (100, 240)})
             # 组装动态头
-            self.__container = Image.new("RGBA", (1108, 300), main_color)
+            self.__container = Image.new("RGBA", (1108, 330), main_color)
             self.__draw = ImageDraw.Draw(self.__container)
             tasks = []
             for i in render_info_list:
                 tasks.append(self.__assembly_header(i))
             await asyncio.gather(*tasks)
-            logger.debug("主头耗时:{}".format(time.time() - start))
             return self.__container
 
+        except:
+            logger.error("\n" + traceback.format_exc())
+
+    async def origin_header_render(self):
+        try:
+            # 获取程序当前运行路径
+            config = configparser.ConfigParser()
+            # 读取配置文件
+            config.read(os.path.join(self.__current_path, "config.ini"))
+            # 读取背景颜色
+            repost_color = config.get("Color", "repost_color")
+            # 读取字体
+            main_font_name = config.get("Font", "main_font")
+            # 读取昵称的字号
+            uname_size = config.getint("Size", "main_font_size")
+            # 读取昵称颜色
+            uname_color = config.get("Color", "extra_color")
+
+            # 获取昵称及头像
+            render_info_list = [{"type": "text",
+                                 "font_color": uname_color,
+                                 "font_size": uname_size,
+                                 "content": self.__author.name,
+                                 "font": main_font_name,
+                                 "position": (80, 15)}]
+            url_list = [{"type": "face", "url": self.__author.face + "@240w_240h_1c_1s.webp",
+                         "path": os.path.join(self.__current_path, "Cache", "Face", str(self.__author.mid) + ".webp")}]
+            # 获取头像和pendant
+            self.__session = httpx.Client()
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = pool.map(self.__get_images, url_list)
+            for result in results:
+                render_info_list.append(result)
+            self.__session.close()
+            self.__container = Image.new("RGBA", (1088, 70), repost_color)
+            self.__draw = ImageDraw.Draw(self.__container)
+            tasks = []
+            for i in render_info_list:
+                tasks.append(self.__assembly_header(i))
+            await asyncio.gather(*tasks)
+            return self.__container
         except:
             logger.error("\n" + traceback.format_exc())
 
@@ -128,7 +175,10 @@ class HeaderRender:
                     f.write(img_content)
                 img = Image.open(BytesIO(img_content)).convert("RGBA")
             img = self.__make_face_circle(img)
-            info = {"type": "img", "content": img, "position": (32, 172)}
+            if not self.__forward:
+                info = {"type": "img", "content": img, "position": (32, 172)}
+            else:
+                info = {"type": "img", "content": img.resize((48, 48), Image.ANTIALIAS), "position": (15, 10)}
         else:
             pendant_path = img_info["path"]
             if os.path.exists(pendant_path):
@@ -170,7 +220,7 @@ class HeaderRender:
         #   mask 为蒙板，原理同 ps， 只显示 mask 中 Alpha 通道值大于等于1的部分
         bg.paste(avatar, box, mask)
         bg = bg.resize((96, 96), Image.ANTIALIAS)
-        bg_draw = ImageDraw.Draw(bg)
+        # bg_draw = ImageDraw.Draw(bg)
         return bg
 
     async def __assembly_header(self, document_info: dict) -> None:

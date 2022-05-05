@@ -34,11 +34,12 @@ class FooterRender:
             # 贴上二维码
             container.paste(qr_code, (905, 160), qr_code)
             # 贴上bili图标
-            container.paste(bili_pic, (50, 100), bili_pic)
+            container.paste(bili_pic, (50, 120), bili_pic)
             # 写入提示扫码语句
             draw = ImageDraw.Draw(container, "RGBA")
             font = ImageFont.truetype(os.path.join(self.__base_path, "Static", "Font", font_name), 20, encoding='utf-8')
-            draw.text((50, 210), "扫描二维码查看动态", font=font, fill="#ff4e80")
+            draw.text((50, 200), "扫描二维码查看动态", font=font, fill="#ff4e80")
+            draw.text((50, 255), "DMC", font=font, fill="#99a2aa")
 
             return container
         except:

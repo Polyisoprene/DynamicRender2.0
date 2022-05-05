@@ -10,8 +10,9 @@ from dynamicrender.Logger import logger
 from dynamicrender.Renderer.FooterRenderer import FooterRender
 from dynamicrender.Renderer.HeaderRenderer import HeaderRender
 from dynamicrender.Renderer.TextRenderer import TextRender
-
-
+from dynamicrender.Renderer.AdditionRenderer import AdditionRender
+from dynamicrender.Renderer.MajorRenderer import MajorRender
+from dynamicrender.Renderer.ForwardRenderer import ForwardRender
 class BiliRender:
     def __init__(self, dynamic: Item):
         self.__dynamic = dynamic
@@ -20,10 +21,12 @@ class BiliRender:
         self.function_dic = {"DYNAMIC_TYPE_WORD": self.word_dynamic,
                              "DYNAMIC_TYPE_DRAW": self.draw_dynamic,
                              "DYNAMIC_TYPE_AV": self.av_dynamic,
-                             "DYNAMIC_TYPE_LIVE_RCMD": self.live_dynamic,
+                             "DYNAMIC_TYPE_LIVE_RCMD": self.live_rcmd_dynamic,
+                             "DYNAMIC_TYPE_LIVE":self.live_dynamic,
                              "DYNAMIC_TYPE_ARTICLE": self.article_dynamic,
                              "DYNAMIC_TYPE_COMMON_VERTICAL": self.vertical_dynamic,
                              "DYNAMIC_TYPE_COURSES_SEASON": self.course_dynamic,
+                             "DYNAMIC_TYPE_MEDIALIST":self.media_list_dynamic,
                              "DYNAMIC_TYPE_PGC": self.video_dynamic,
                              "DYNAMIC_TYPE_MUSIC": self.music_dynamic,
                              "DYNAMIC_TYPE_COMMON_SQUARE": self.square_dynamic,
@@ -52,7 +55,6 @@ class BiliRender:
         curren_abs_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         if not os.path.exists(static_path):
             try:
-
                 logger.info("创建静态文件目录")
                 os.makedirs(static_path)
                 self.copy_dir(os.path.join(curren_abs_path, "Static"), static_path)
@@ -80,11 +82,11 @@ class BiliRender:
                 'file_level': 'ERROR',
                 'log_level': 'INFO'}
             config["Color"] = {
-                'main_color': '#ffffff',
-                'repost_color': '#f4f5f7',
+                'main_color': '#dcdad7',
+                'repost_color': '#d5d3cf',
                 'main_font_color': 'black',
                 'sub_font_color': '#99a2aa',
-                'extra_color': '#848484'
+                'extra_color': '#00a1d6'
             }
             config["Size"] = {
                 'uname_font_size': 32,
@@ -118,6 +120,8 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -138,6 +142,32 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
+            result = await asyncio.gather(*tasks)
+            if result:
+                img = await self.assemble_card(result)
+                return img
+            else:
+                return
+        except:
+            logger.error("\n" + traceback.format_exc())
+            return
+
+    async def media_list_dynamic(self):
+        """
+        收藏
+        :return:
+        """
+        try:
+            tasks = []
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
+            tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -158,6 +188,29 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
+            tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
+            result = await asyncio.gather(*tasks)
+            if result:
+                img = await self.assemble_card(result)
+                return img
+            else:
+                return
+        except:
+            logger.error("\n" + traceback.format_exc())
+            return
+
+    async def live_rcmd_dynamic(self):
+        """
+        直播类型动态处理函数
+        :return:
+        """
+        try:
+            tasks = []
+            tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -171,12 +224,13 @@ class BiliRender:
 
     async def live_dynamic(self):
         """
-        直播类型动态处理函数
-        :return:
-        """
+       直播类型动态处理函数
+       :return:
+       """
         try:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -188,6 +242,7 @@ class BiliRender:
             logger.error("\n" + traceback.format_exc())
             return
 
+
     async def article_dynamic(self):
         """
         专栏类型动态处理函数
@@ -196,6 +251,9 @@ class BiliRender:
         try:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -216,6 +274,9 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -236,6 +297,9 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -256,6 +320,9 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -276,6 +343,9 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -296,6 +366,9 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+            tasks.append(MajorRender(self.__dynamic.modules.module_dynamic.major).major_render())
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -316,6 +389,11 @@ class BiliRender:
             tasks = []
             tasks.append(HeaderRender(self.__dynamic.modules.module_author).main_header_render())
             tasks.append(TextRender(self.__dynamic.modules.module_dynamic).main_text_render())
+
+            tasks.append(ForwardRender(self.__dynamic.orig).render())
+
+            if self.__dynamic.modules.module_dynamic.additional:
+                tasks.append(AdditionRender(self.__dynamic.modules.module_dynamic).addition_render())
             tasks.append(FooterRender(self.__dynamic.id_str).foot_render())
             result = await asyncio.gather(*tasks)
             if result:
@@ -364,5 +442,4 @@ class BiliRender:
             return False
 
 
-if __name__ == '__main__':
-    print(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
