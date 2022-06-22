@@ -6,9 +6,11 @@
 pip install dynamicrender
 
 from dynamicrender.Renderer import BiliRender
+from dynamicrender.DynamicChecker import Item
+
 
 #item 为动态数据中的item
 
-
+item = Item(**item)
 img = await BiliRender(item).render()
 ```
